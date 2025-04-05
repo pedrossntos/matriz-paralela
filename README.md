@@ -1,2 +1,2 @@
 ﻿# matriz-paralela
-gcc -fopenmp matriz_paralela.c -o matriz_paralela              
+gcc -fopenmp produto-matriz.c -o produto-matriz
