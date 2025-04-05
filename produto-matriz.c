@@ -3,7 +3,7 @@
 #include <time.h>
 #include <omp.h>
 
-#define N 500
+#define N 10000
 
 void preencherMatriz(int **matriz) {
     for (int i = 0; i < N; i++)
@@ -21,7 +21,10 @@ void imprimirMatriz(int **matriz) {
 
 int main() {
     int i, j, k;
+    double tempo_cpu;
+    clock_t start, end;
 
+    start = clock();
     // alocação dinâmica das matrizes
     int **A = malloc(N * sizeof(int *));
     int **B = malloc(N * sizeof(int *));
@@ -50,6 +53,7 @@ int main() {
             for (k = 0; k < N; k++)
                 C[i][j] += A[i][k] * B[k][j];
 
+    imprimirMatriz(C);             
     printf("multiplicação paralela de matrizes %dx%d concluída.\n", N, N);
 
     // liberar memória
@@ -61,6 +65,12 @@ int main() {
     free(A);
     free(B);
     free(C);
+
+    end = clock();
+
+    tempo_cpu = ((double) (end - start)) / CLOCKS_PER_SEC;
+
+    printf("tempo de execução: %f seg\n", tempo_cpu);
 
     return 0;
 }
