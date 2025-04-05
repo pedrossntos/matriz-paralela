@@ -3,15 +3,15 @@
 #include <time.h>
 #include <omp.h>
 
-#define N 1000 // tamanho da matriz (pode ajustar para testar desempenho)
+#define N 500
 
-void preencherMatriz(int matriz[N][N]) {
+void preencherMatriz(int **matriz) {
     for (int i = 0; i < N; i++)
         for (int j = 0; j < N; j++)
-            matriz[i][j] = rand() % 10; // valores de 0 a 9
+            matriz[i][j] = rand() % 10;
 }
 
-void imprimirMatriz(int matriz[N][N]) {
+void imprimirMatriz(int **matriz) {
     for (int i = 0; i < N; i++) {
         for (int j = 0; j < N; j++)
             printf("%d ", matriz[i][j]);
@@ -20,35 +20,47 @@ void imprimirMatriz(int matriz[N][N]) {
 }
 
 int main() {
-    int A[N][N], B[N][N], C[N][N];
     int i, j, k;
 
-    srand(time(NULL)); // inicializa a semente para números aleatórios
+    // alocação dinâmica das matrizes
+    int **A = malloc(N * sizeof(int *));
+    int **B = malloc(N * sizeof(int *));
+    int **C = malloc(N * sizeof(int *));
+    for (i = 0; i < N; i++) {
+        A[i] = malloc(N * sizeof(int));
+        B[i] = malloc(N * sizeof(int));
+        C[i] = malloc(N * sizeof(int));
+    }
 
-    // preenche as matrizes A e B com valores aleatórios
+    srand(time(NULL)); // inicializa aleatório
+
     preencherMatriz(A);
     preencherMatriz(B);
 
-    // inicializa a matriz C com zeros
+    // inicialização da matriz C
     #pragma omp parallel for private(j)
     for (i = 0; i < N; i++)
         for (j = 0; j < N; j++)
             C[i][j] = 0;
 
-    // realiza a multiplicação de matrizes em paralelo
+    // multiplicação paralela
     #pragma omp parallel for private(j, k) shared(A, B, C)
-    for (i = 0; i < N; i++) {
-        for (j = 0; j < N; j++) {
-            for (k = 0; k < N; k++) {
+    for (i = 0; i < N; i++)
+        for (j = 0; j < N; j++)
+            for (k = 0; k < N; k++)
                 C[i][j] += A[i][k] * B[k][j];
-            }
-        }
-    }
-
-    // para visualizar a matriz resultado, use N pequeno e descomente a linha abaixo
-    imprimirMatriz(C);
 
     printf("multiplicação paralela de matrizes %dx%d concluída.\n", N, N);
+
+    // liberar memória
+    for (i = 0; i < N; i++) {
+        free(A[i]);
+        free(B[i]);
+        free(C[i]);
+    }
+    free(A);
+    free(B);
+    free(C);
 
     return 0;
 }
